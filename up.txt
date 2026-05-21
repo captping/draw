@@ -1,0 +1,99 @@
+from pathlib import Path
+import xml.etree.ElementTree as ET
+
+OUTPUT_FILE = Path.home() / "Desktop" / "mobile_security_workflow.drawio"
+
+mxfile = ET.Element("mxfile", {"host": "app.diagrams.net"})
+diagram = ET.SubElement(mxfile, "diagram", {"name": "Mobile Security Workflow"})
+model = ET.SubElement(diagram, "mxGraphModel", {
+    "dx": "1600", "dy": "1000", "grid": "1", "gridSize": "10",
+    "guides": "1", "tooltips": "1", "connect": "1", "arrows": "1",
+    "fold": "1", "page": "1", "pageScale": "1",
+    "pageWidth": "1600", "pageHeight": "1000", "math": "0", "shadow": "1"
+})
+
+root = ET.SubElement(model, "root")
+ET.SubElement(root, "mxCell", {"id": "0"})
+ET.SubElement(root, "mxCell", {"id": "1", "parent": "0"})
+
+
+def box(id, text, x, y, w, h, fill, stroke, font="#1f2937", size="14", bold=False):
+    style = (
+        f"rounded=1;whiteSpace=wrap;html=1;fillColor={fill};strokeColor={stroke};"
+        f"fontColor={font};fontSize={size};spacing=10;shadow=1;"
+    )
+    if bold:
+        style += "fontStyle=1;"
+    cell = ET.SubElement(root, "mxCell", {
+        "id": id, "value": text, "style": style, "vertex": "1", "parent": "1"
+    })
+    ET.SubElement(cell, "mxGeometry", {
+        "x": str(x), "y": str(y), "width": str(w), "height": str(h), "as": "geometry"
+    })
+
+
+def edge(id, source, target, label="", dashed=False):
+    style = (
+        "edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;"
+        "html=1;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#4b5563;fontSize=12;"
+    )
+    if dashed:
+        style += "dashed=1;"
+    cell = ET.SubElement(root, "mxCell", {
+        "id": id, "value": label, "style": style, "edge": "1",
+        "parent": "1", "source": source, "target": target
+    })
+    ET.SubElement(cell, "mxGeometry", {"relative": "1", "as": "geometry"})
+
+
+box("title", "Mobile Security Review and Remediation Workflow", 40, 30, 900, 50, "#ffffff", "none", "#0f3b5f", "26", True)
+
+box("pipeline", "☁️ Mobile Pipeline in Azure DevOps", 70, 110, 260, 80, "#eaf3ff", "#2f6ca3", "#0f3b5f", "18", True)
+box("build", "📦 Build Artifacts&#xa;APK / IPA uploaded to Nexus Repository Manager", 70, 230, 260, 95, "#ffffff", "#2f6ca3", "#0f3b5f", "14", True)
+
+box("fortify", "🔍 Fortify SAST&#xa;Standard bank secure-code process", 390, 120, 250, 90, "#f3e8ff", "#7e22ce", "#3b0764", "14", True)
+box("nexus", "🧩 Nexus SCA&#xa;Dependency and component review", 390, 240, 250, 90, "#f3e8ff", "#7e22ce", "#3b0764", "14", True)
+
+box("oversecured", "🛡️ Oversecured Mobile SAST&#xa;&#xa;• Static mobile package analysis&#xa;• Reviews APK / IPA&#xa;• Mobile-specific findings", 70, 390, 310, 170, "#eaf3ff", "#2563eb", "#0f3b5f", "14", True)
+
+box("ostorlab", "🔎 Ostorlab Mobile DAST&#xa;&#xa;• Authenticated runtime testing&#xa;• Uses test credentials&#xa;• Tests logged-in flows", 70, 600, 310, 170, "#ecfdf5", "#059669", "#064e3b", "14", True)
+
+box("review", "Review and Validate Findings&#xa;&#xa;❌ False Positive → No Action&#xa;&#xa;✅ Confirmed Issue → Proceed to Ticketing&#xa;&#xa;Severity based on CVSS, context and compensating controls", 460, 430, 310, 230, "#ffffff", "#6b7280", "#111827", "14", True)
+
+box("boards", "📝 Azure Boards - Mobile Security&#xa;&#xa;Create User Story&#xa;&#xa;Include vulnerability details, evidence, affected version, impact and remediation guidance&#xa;&#xa;Tags: AAA / BUUT / BLOCK", 850, 340, 330, 260, "#f8fafc", "#1d4ed8", "#0f3b5f", "14", True)
+
+box("snow", "🛡️ ServiceNow Risk Acceptance&#xa;&#xa;Used when remediation is not feasible or must be deferred", 1250, 350, 260, 105, "#fff7ed", "#f97316", "#7c2d12", "14", True)
+
+box("fix", "✅ Issue Fixed by Development Team", 1250, 500, 260, 80, "#ecfdf5", "#059669", "#064e3b", "14", True)
+
+box("rerun", "🔁 Re-run Mobile Pipeline&#xa;&#xa;• SAST and DAST executed again&#xa;• Verify remediation&#xa;• Close finding after validation", 850, 670, 330, 120, "#eef2ff", "#4f46e5", "#312e81", "14", True)
+
+box("confluence", "📚 Confluence Review Roster&#xa;&#xa;• Weekly review notes&#xa;• Reviewed applications&#xa;• Scan reports attached&#xa;• Status and follow-up tracking", 460, 710, 310, 160, "#f9fafb", "#6b7280", "#111827", "14", True)
+
+box("devteam", "👥 Development Teams&#xa;&#xa;Receive assigned findings, provide fixes, clarifications or risk acceptance input", 1220, 680, 310, 140, "#ffffff", "#6b7280", "#111827", "14", True)
+
+box("apps", "📱 Applications in Scope&#xa;ABN AMRO Mobile App | BUUT | Tikkie | PBI | Tikkie Zakelijk", 70, 820, 620, 70, "#ffffff", "#9ca3af", "#374151", "13", True)
+
+edge("e1", "pipeline", "build", "build trigger")
+edge("e2", "build", "fortify", "standard SAST")
+edge("e3", "build", "nexus", "SCA")
+edge("e4", "build", "oversecured", "mobile artifact")
+edge("e5", "build", "ostorlab", "runtime test package")
+edge("e6", "oversecured", "review", "scan results")
+edge("e7", "ostorlab", "review", "runtime results")
+edge("e8", "review", "boards", "valid finding")
+edge("e9", "boards", "snow", "risk acceptance")
+edge("e10", "boards", "fix", "remediation")
+edge("e11", "fix", "rerun", "retest")
+edge("e12", "rerun", "review", "verify closure", True)
+edge("e13", "review", "confluence", "record review", True)
+edge("e14", "boards", "devteam", "assign to developers")
+edge("e15", "devteam", "fix", "fix and confirm", True)
+
+box("legend", "Legend: Blue = Mobile pipeline and SAST | Green = Runtime testing and remediation | Purple = Standard secure-code scans | Orange = Risk acceptance | Grey = Tracking and collaboration", 70, 920, 1250, 50, "#ffffff", "#9ca3af", "#374151", "13", False)
+
+tree = ET.ElementTree(mxfile)
+ET.indent(tree, space="  ", level=0)
+tree.write(OUTPUT_FILE, encoding="utf-8", xml_declaration=True)
+
+print(f"Created: {OUTPUT_FILE}")
